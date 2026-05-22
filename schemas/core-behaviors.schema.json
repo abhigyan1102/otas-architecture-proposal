@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OpenTokenizedAssetStandard/schemas/core-behaviors.schema.json",
+  "title": "OTAS Core Behavior Interface Specifications",
+  "description": "Protocol-neutral schema defining the behavioral interfaces (primitives) that OTAS-compliant tokens may implement. Each behavior is composable — tokens implement the subset relevant to their asset class.",
+  "type": "object",
+  "properties": {
+    "behaviors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BehaviorSpec"
+      }
+    }
+  },
+  "$defs": {
+    "BehaviorSpec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["ComplianceGated", "Holdable", "Settleable", "MetadataAttachable"],
+          "description": "The behavior primitive identifier"
+        },
+        "description": {
+          "type": "string"
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Operation"
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventSpec"
+          }
+        }
+      },
+      "required": ["name", "operations", "events"]
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Operation name (e.g., canTransfer, createHold)"
+        },
+        "mutability": {
+          "type": "string",
+          "enum": ["view", "pure", "state-changing"],
+          "description": "Whether the operation modifies state"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Parameter"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Parameter"
+          }
+        },
+        "preconditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Conditions that must hold before the operation executes"
+        },
+        "postconditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Conditions guaranteed after the operation succeeds"
+        }
+      },
+      "required": ["name", "mutability", "inputs", "outputs"]
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["address", "uint256", "bytes32", "bool", "string", "bytes", "struct"],
+          "description": "Abstract type — mapped to concrete types per platform"
+        },
+        "description": { "type": "string" }
+      },
+      "required": ["name", "type"]
+    },
+    "EventSpec": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "indexed": { "type": "boolean", "default": false }
+            },
+            "required": ["name", "type"]
+          }
+        }
+      },
+      "required": ["name", "fields"]
+    }
+  }
+}

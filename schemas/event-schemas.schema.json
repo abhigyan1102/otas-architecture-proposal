@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OpenTokenizedAssetStandard/schemas/event-schemas.schema.json",
+  "title": "OTAS Event Schema Specifications",
+  "description": "Standardized event schemas for on-chain auditability across Ethereum and SUI. Every OTAS state change emits a typed event conforming to these specifications.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "eventCategories": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EventCategory"
+      }
+    }
+  },
+  "$defs": {
+    "EventCategory": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["Lifecycle", "Compliance", "Hold", "Settlement", "Metadata"]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventDefinition"
+          }
+        }
+      },
+      "required": ["category", "events"]
+    },
+    "EventDefinition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Event name (e.g., Minted, HoldCreated, DvPFinalized)"
+        },
+        "description": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventField"
+          }
+        },
+        "emittedBy": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["ITokenBase", "IComplianceGated", "IHoldable", "ISettleable", "IMetadataAttachable"]
+          },
+          "description": "Which primitive(s) emit this event"
+        }
+      },
+      "required": ["name", "fields", "emittedBy"]
+    },
+    "EventField": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["address", "uint256", "bytes32", "bool", "string", "bytes"]
+        },
+        "indexed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field is indexed for efficient log filtering (Ethereum) or queryable (SUI)"
+        },
+        "description": { "type": "string" }
+      },
+      "required": ["name", "type"]
+    }
+  }
+}

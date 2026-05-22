@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OpenTokenizedAssetStandard/schemas/token-base-types.schema.json",
+  "title": "OTAS Token Base Type Classification",
+  "description": "Protocol-neutral schema defining token base type classifications for the Open Tokenized Asset Standard. This schema is the single source of truth from which Solidity and Move interfaces are derived.",
+  "type": "object",
+  "properties": {
+    "baseType": {
+      "type": "string",
+      "enum": ["Fungible", "NonFungible", "Partitioned", "Composite"],
+      "description": "The fundamental classification of the token. Determines which base operations and event schemas apply."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Human-readable name of the token"
+    },
+    "symbol": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12,
+      "description": "Short ticker symbol"
+    },
+    "decimals": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18,
+      "description": "Number of decimal places. Applicable only to Fungible and Partitioned types."
+    },
+    "totalSupply": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Total supply as a decimal string (to avoid integer overflow in schema validation)"
+    },
+    "issuer": {
+      "$ref": "#/$defs/EntityIdentifier",
+      "description": "The entity that issued this token"
+    },
+    "partitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Partition"
+      },
+      "description": "Applicable only to Partitioned base type. Defines the tranches/partitions."
+    }
+  },
+  "required": ["baseType", "name", "symbol"],
+  "$defs": {
+    "EntityIdentifier": {
+      "type": "object",
+      "properties": {
+        "lei": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{20}$",
+          "description": "ISO 17442 Legal Entity Identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Legal name of the entity"
+        },
+        "jurisdiction": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code"
+        }
+      }
+    },
+    "Partition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique partition identifier (e.g., 'senior', 'subordinate', 'mezzanine')"
+        },
+        "supply": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Partition-specific properties (e.g., priority, yield, maturity)"
+        }
+      },
+      "required": ["id"]
+    }
+  }
+}
