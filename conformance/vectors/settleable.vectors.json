@@ -1,0 +1,140 @@
+[
+  {
+    "id": "STL-001",
+    "description": "Initiate a DvP between buyer and seller",
+    "primitive": "ISettleable",
+    "operation": "initDvP",
+    "setup": {
+      "assetToken": { "balances": { "0xSeller": "1000000" } },
+      "paymentToken": { "balances": { "0xBuyer": "5000000" } }
+    },
+    "input": {
+      "terms": {
+        "assetToken": "0xAssetToken",
+        "assetAmount": "100000",
+        "paymentToken": "0xPaymentToken",
+        "paymentAmount": "500000",
+        "buyer": "0xBuyer",
+        "seller": "0xSeller",
+        "expiryBlock": 20000000
+      }
+    },
+    "expected": {
+      "output": { "dvpId": "0xDVP01" },
+      "stateChanges": {
+        "dvpStatus": { "0xDVP01": "Initiated" }
+      },
+      "events": [
+        { "name": "DvPInitiated", "fields": { "dvpId": "0xDVP01", "assetToken": "0xAssetToken", "paymentToken": "0xPaymentToken", "buyer": "0xBuyer", "seller": "0xSeller" } }
+      ],
+      "reverts": false
+    },
+    "note": "Compliance checks (canTransfer) should be evaluated at initiation time"
+  },
+  {
+    "id": "STL-002",
+    "description": "Buyer commits to a DvP",
+    "primitive": "ISettleable",
+    "operation": "commit",
+    "setup": {
+      "dvps": {
+        "0xDVP01": { "status": "Initiated", "buyer": "0xBuyer", "seller": "0xSeller" }
+      }
+    },
+    "input": {
+      "caller": "0xBuyer",
+      "dvpId": "0xDVP01"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "dvpStatus": { "0xDVP01": "BuyerCommitted" }
+      },
+      "events": [
+        { "name": "DvPCommitted", "fields": { "dvpId": "0xDVP01", "party": "0xBuyer" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "STL-003",
+    "description": "Finalize DvP after both parties commit — atomic settlement",
+    "primitive": "ISettleable",
+    "operation": "finalize",
+    "setup": {
+      "dvps": {
+        "0xDVP01": {
+          "status": "BothCommitted",
+          "assetToken": "0xAssetToken",
+          "assetAmount": "100000",
+          "paymentToken": "0xPaymentToken",
+          "paymentAmount": "500000",
+          "buyer": "0xBuyer",
+          "seller": "0xSeller"
+        }
+      }
+    },
+    "input": {
+      "dvpId": "0xDVP01"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "dvpStatus": { "0xDVP01": "Finalized" },
+        "assetTransfer": { "from": "0xSeller", "to": "0xBuyer", "amount": "100000" },
+        "paymentTransfer": { "from": "0xBuyer", "to": "0xSeller", "amount": "500000" }
+      },
+      "events": [
+        { "name": "DvPFinalized", "fields": { "dvpId": "0xDVP01" } }
+      ],
+      "reverts": false
+    },
+    "note": "Both asset and payment legs execute atomically"
+  },
+  {
+    "id": "STL-004",
+    "description": "Finalize should revert if not both parties have committed",
+    "primitive": "ISettleable",
+    "operation": "finalize",
+    "setup": {
+      "dvps": {
+        "0xDVP01": { "status": "BuyerCommitted" }
+      }
+    },
+    "input": {
+      "dvpId": "0xDVP01"
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "both parties must commit"
+    }
+  },
+  {
+    "id": "STL-005",
+    "description": "Abort DvP releases all holds and returns to pre-DvP state",
+    "primitive": "ISettleable",
+    "operation": "abort",
+    "setup": {
+      "dvps": {
+        "0xDVP01": { "status": "BuyerCommitted", "buyer": "0xBuyer", "seller": "0xSeller" }
+      }
+    },
+    "input": {
+      "caller": "0xSeller",
+      "dvpId": "0xDVP01"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "dvpStatus": { "0xDVP01": "Aborted" }
+      },
+      "events": [
+        { "name": "DvPAborted", "fields": { "dvpId": "0xDVP01", "abortedBy": "0xSeller" } }
+      ],
+      "reverts": false
+    }
+  }
+]

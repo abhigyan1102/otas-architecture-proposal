@@ -1,0 +1,130 @@
+[
+  {
+    "id": "META-001",
+    "description": "Attach structured metadata with ISO identifiers to a token",
+    "primitive": "IMetadataAttachable",
+    "operation": "attach",
+    "setup": {
+      "metadata": {}
+    },
+    "input": {
+      "caller": "0xIssuer",
+      "tokenId": "0",
+      "metadata": {
+        "isin": "US91282CJL54",
+        "lei": "254900HROIFWPRGM1V77",
+        "cfi": "DBFTFR",
+        "termSheetURI": "ipfs://QmExampleHash123",
+        "termSheetHash": "0xabcdef1234567890",
+        "extensions": ""
+      }
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {
+        "metadata": {
+          "0": {
+            "isin": "US91282CJL54",
+            "lei": "254900HROIFWPRGM1V77",
+            "cfi": "DBFTFR",
+            "termSheetURI": "ipfs://QmExampleHash123"
+          }
+        }
+      },
+      "events": [
+        { "name": "MetadataAttached", "fields": { "tokenId": "0", "isin": "US91282CJL54", "lei": "254900HROIFWPRGM1V77" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "META-002",
+    "description": "Resolve metadata returns the attached data",
+    "primitive": "IMetadataAttachable",
+    "operation": "resolve",
+    "setup": {
+      "metadata": {
+        "0": {
+          "isin": "US91282CJL54",
+          "lei": "254900HROIFWPRGM1V77",
+          "cfi": "DBFTFR",
+          "termSheetURI": "ipfs://QmExampleHash123",
+          "termSheetHash": "0xabcdef1234567890",
+          "extensions": ""
+        }
+      }
+    },
+    "input": {
+      "tokenId": "0"
+    },
+    "expected": {
+      "output": {
+        "isin": "US91282CJL54",
+        "lei": "254900HROIFWPRGM1V77",
+        "cfi": "DBFTFR",
+        "termSheetURI": "ipfs://QmExampleHash123",
+        "termSheetHash": "0xabcdef1234567890"
+      },
+      "stateChanges": {},
+      "events": [],
+      "reverts": false
+    }
+  },
+  {
+    "id": "META-003",
+    "description": "Only issuer can attach metadata",
+    "primitive": "IMetadataAttachable",
+    "operation": "attach",
+    "setup": {
+      "issuer": "0xIssuer"
+    },
+    "input": {
+      "caller": "0xMallory",
+      "tokenId": "0",
+      "metadata": {
+        "isin": "FAKE12345678",
+        "lei": "FAKE",
+        "cfi": "FAKE",
+        "termSheetURI": "",
+        "termSheetHash": "0x00",
+        "extensions": ""
+      }
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "only issuer"
+    }
+  },
+  {
+    "id": "META-004",
+    "description": "Update a specific metadata field emits MetadataUpdated event",
+    "primitive": "IMetadataAttachable",
+    "operation": "updateField",
+    "setup": {
+      "issuer": "0xIssuer",
+      "metadata": {
+        "0": {
+          "termSheetURI": "ipfs://QmOldHash",
+          "termSheetHash": "0xOLDHASH"
+        }
+      }
+    },
+    "input": {
+      "caller": "0xIssuer",
+      "tokenId": "0",
+      "field": "termSheetURI",
+      "data": "ipfs://QmNewHash456"
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [
+        { "name": "MetadataUpdated", "fields": { "tokenId": "0", "field": "termSheetURI", "previousHash": "0xOLDHASH" } }
+      ],
+      "reverts": false
+    }
+  }
+]

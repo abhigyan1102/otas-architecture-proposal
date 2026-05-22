@@ -1,0 +1,132 @@
+[
+  {
+    "id": "CG-001",
+    "description": "Permissive compliance policy allows any transfer",
+    "primitive": "IComplianceGated",
+    "operation": "canTransfer",
+    "setup": {
+      "policy": "permissive",
+      "eligibleAccounts": ["0xAlice", "0xBob"]
+    },
+    "input": {
+      "from": "0xAlice",
+      "to": "0xBob",
+      "amount": "1000"
+    },
+    "expected": {
+      "output": { "allowed": true, "reasonCode": "0x00" },
+      "stateChanges": {},
+      "events": [],
+      "reverts": false
+    }
+  },
+  {
+    "id": "CG-002",
+    "description": "Transfer rejected when recipient is not eligible",
+    "primitive": "IComplianceGated",
+    "operation": "canTransfer",
+    "setup": {
+      "policy": "restrictive",
+      "eligibleAccounts": ["0xAlice"]
+    },
+    "input": {
+      "from": "0xAlice",
+      "to": "0xCharlie",
+      "amount": "1000"
+    },
+    "expected": {
+      "output": { "allowed": false, "reasonCode": "0x02" },
+      "stateChanges": {},
+      "events": [
+        { "name": "TransferRestricted", "fields": { "from": "0xAlice", "to": "0xCharlie", "amount": "1000", "reasonCode": "0x02" } }
+      ],
+      "reverts": false
+    },
+    "note": "reasonCode 0x02 = Recipient not eligible"
+  },
+  {
+    "id": "CG-003",
+    "description": "Transfer rejected when sender is not eligible",
+    "primitive": "IComplianceGated",
+    "operation": "canTransfer",
+    "setup": {
+      "policy": "restrictive",
+      "eligibleAccounts": ["0xBob"]
+    },
+    "input": {
+      "from": "0xMallory",
+      "to": "0xBob",
+      "amount": "500"
+    },
+    "expected": {
+      "output": { "allowed": false, "reasonCode": "0x01" },
+      "stateChanges": {},
+      "events": [
+        { "name": "TransferRestricted", "fields": { "from": "0xMallory", "to": "0xBob", "amount": "500", "reasonCode": "0x01" } }
+      ],
+      "reverts": false
+    },
+    "note": "reasonCode 0x01 = Sender not eligible"
+  },
+  {
+    "id": "CG-004",
+    "description": "isEligible returns true for a registered account",
+    "primitive": "IComplianceGated",
+    "operation": "isEligible",
+    "setup": {
+      "eligibleAccounts": ["0xAlice"]
+    },
+    "input": {
+      "account": "0xAlice"
+    },
+    "expected": {
+      "output": { "eligible": true },
+      "stateChanges": {},
+      "events": [],
+      "reverts": false
+    }
+  },
+  {
+    "id": "CG-005",
+    "description": "isEligible returns false for an unregistered account",
+    "primitive": "IComplianceGated",
+    "operation": "isEligible",
+    "setup": {
+      "eligibleAccounts": ["0xAlice"]
+    },
+    "input": {
+      "account": "0xUnknown"
+    },
+    "expected": {
+      "output": { "eligible": false },
+      "stateChanges": {},
+      "events": [],
+      "reverts": false
+    }
+  },
+  {
+    "id": "CG-006",
+    "description": "Transfer rejected when amount exceeds per-transfer limit",
+    "primitive": "IComplianceGated",
+    "operation": "canTransfer",
+    "setup": {
+      "policy": "amount-limited",
+      "eligibleAccounts": ["0xAlice", "0xBob"],
+      "maxTransferAmount": "10000"
+    },
+    "input": {
+      "from": "0xAlice",
+      "to": "0xBob",
+      "amount": "50000"
+    },
+    "expected": {
+      "output": { "allowed": false, "reasonCode": "0x03" },
+      "stateChanges": {},
+      "events": [
+        { "name": "TransferRestricted", "fields": { "from": "0xAlice", "to": "0xBob", "amount": "50000", "reasonCode": "0x03" } }
+      ],
+      "reverts": false
+    },
+    "note": "reasonCode 0x03 = Amount exceeds limit"
+  }
+]

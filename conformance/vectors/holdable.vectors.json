@@ -1,0 +1,164 @@
+[
+  {
+    "id": "HLD-001",
+    "description": "Create a hold and verify held balance increases",
+    "primitive": "IHoldable",
+    "operation": "createHold",
+    "setup": {
+      "balances": { "0xAlice": "1000000" },
+      "heldBalances": { "0xAlice": "0" }
+    },
+    "input": {
+      "holdId": "0xHOLD01",
+      "holder": "0xAlice",
+      "notary": "0xCCP",
+      "amount": "250000",
+      "expiry": 1750000000
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "heldBalances": { "0xAlice": "250000" },
+        "availableBalances": { "0xAlice": "750000" },
+        "holdStatus": { "0xHOLD01": "Active" }
+      },
+      "events": [
+        { "name": "HoldCreated", "fields": { "holdId": "0xHOLD01", "holder": "0xAlice", "notary": "0xCCP", "amount": "250000", "expiry": 1750000000 } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "HLD-002",
+    "description": "Create hold should revert when holder has insufficient available balance",
+    "primitive": "IHoldable",
+    "operation": "createHold",
+    "setup": {
+      "balances": { "0xAlice": "100" },
+      "heldBalances": { "0xAlice": "0" }
+    },
+    "input": {
+      "holdId": "0xHOLD02",
+      "holder": "0xAlice",
+      "notary": "0xCCP",
+      "amount": "500",
+      "expiry": 1750000000
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "insufficient balance"
+    }
+  },
+  {
+    "id": "HLD-003",
+    "description": "Execute hold transfers held amount to destination",
+    "primitive": "IHoldable",
+    "operation": "executeHold",
+    "setup": {
+      "balances": { "0xAlice": "1000000", "0xBob": "0" },
+      "heldBalances": { "0xAlice": "250000" },
+      "holds": {
+        "0xHOLD01": { "holder": "0xAlice", "notary": "0xCCP", "amount": "250000", "status": "Active" }
+      }
+    },
+    "input": {
+      "caller": "0xCCP",
+      "holdId": "0xHOLD01",
+      "to": "0xBob"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "balances": { "0xAlice": "750000", "0xBob": "250000" },
+        "heldBalances": { "0xAlice": "0" },
+        "holdStatus": { "0xHOLD01": "Executed" }
+      },
+      "events": [
+        { "name": "HoldExecuted", "fields": { "holdId": "0xHOLD01", "to": "0xBob", "amount": "250000" } },
+        { "name": "Transferred", "fields": { "from": "0xAlice", "to": "0xBob", "amount": "250000" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "HLD-004",
+    "description": "Execute hold should revert when caller is not the notary",
+    "primitive": "IHoldable",
+    "operation": "executeHold",
+    "setup": {
+      "holds": {
+        "0xHOLD01": { "holder": "0xAlice", "notary": "0xCCP", "amount": "250000", "status": "Active" }
+      }
+    },
+    "input": {
+      "caller": "0xMallory",
+      "holdId": "0xHOLD01",
+      "to": "0xBob"
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "only notary"
+    }
+  },
+  {
+    "id": "HLD-005",
+    "description": "Release hold returns held amount to available balance",
+    "primitive": "IHoldable",
+    "operation": "releaseHold",
+    "setup": {
+      "balances": { "0xAlice": "1000000" },
+      "heldBalances": { "0xAlice": "250000" },
+      "holds": {
+        "0xHOLD01": { "holder": "0xAlice", "notary": "0xCCP", "amount": "250000", "status": "Active" }
+      }
+    },
+    "input": {
+      "caller": "0xCCP",
+      "holdId": "0xHOLD01"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "heldBalances": { "0xAlice": "0" },
+        "availableBalances": { "0xAlice": "1000000" },
+        "holdStatus": { "0xHOLD01": "Released" }
+      },
+      "events": [
+        { "name": "HoldReleased", "fields": { "holdId": "0xHOLD01", "amount": "250000" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "HLD-006",
+    "description": "Cannot create a hold with a duplicate holdId",
+    "primitive": "IHoldable",
+    "operation": "createHold",
+    "setup": {
+      "balances": { "0xAlice": "1000000" },
+      "holds": {
+        "0xHOLD01": { "holder": "0xAlice", "notary": "0xCCP", "amount": "100000", "status": "Active" }
+      }
+    },
+    "input": {
+      "holdId": "0xHOLD01",
+      "holder": "0xAlice",
+      "notary": "0xCCP",
+      "amount": "200000",
+      "expiry": 1750000000
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "hold exists"
+    }
+  }
+]

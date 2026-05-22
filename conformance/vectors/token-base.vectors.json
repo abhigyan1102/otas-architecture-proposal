@@ -1,0 +1,142 @@
+[
+  {
+    "id": "TB-001",
+    "description": "Mint tokens to an address and verify balance increases",
+    "primitive": "ITokenBase",
+    "operation": "mint",
+    "setup": {
+      "totalSupply": "0",
+      "balances": {}
+    },
+    "input": {
+      "to": "0xAlice",
+      "amount": "1000000",
+      "operationId": "0x0001"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "totalSupply": "1000000",
+        "balances": { "0xAlice": "1000000" }
+      },
+      "events": [
+        { "name": "Minted", "fields": { "to": "0xAlice", "amount": "1000000", "operationId": "0x0001" } },
+        { "name": "Transferred", "fields": { "from": "0x0", "to": "0xAlice", "amount": "1000000" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "TB-002",
+    "description": "Transfer tokens between two accounts",
+    "primitive": "ITokenBase",
+    "operation": "transfer",
+    "setup": {
+      "totalSupply": "1000000",
+      "balances": { "0xAlice": "1000000", "0xBob": "0" }
+    },
+    "input": {
+      "caller": "0xAlice",
+      "to": "0xBob",
+      "amount": "300000"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "totalSupply": "1000000",
+        "balances": { "0xAlice": "700000", "0xBob": "300000" }
+      },
+      "events": [
+        { "name": "Transferred", "fields": { "from": "0xAlice", "to": "0xBob", "amount": "300000" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "TB-003",
+    "description": "Transfer should revert when sender has insufficient balance",
+    "primitive": "ITokenBase",
+    "operation": "transfer",
+    "setup": {
+      "totalSupply": "1000000",
+      "balances": { "0xAlice": "100", "0xBob": "0" }
+    },
+    "input": {
+      "caller": "0xAlice",
+      "to": "0xBob",
+      "amount": "500"
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "insufficient balance"
+    }
+  },
+  {
+    "id": "TB-004",
+    "description": "Transfer of zero amount should revert or no-op",
+    "primitive": "ITokenBase",
+    "operation": "transfer",
+    "setup": {
+      "totalSupply": "1000000",
+      "balances": { "0xAlice": "1000000" }
+    },
+    "input": {
+      "caller": "0xAlice",
+      "to": "0xBob",
+      "amount": "0"
+    },
+    "expected": {
+      "output": {},
+      "stateChanges": {},
+      "events": [],
+      "reverts": true,
+      "revertReason": "invalid amount"
+    }
+  },
+  {
+    "id": "TB-005",
+    "description": "Burn tokens and verify supply decreases",
+    "primitive": "ITokenBase",
+    "operation": "burn",
+    "setup": {
+      "totalSupply": "1000000",
+      "balances": { "0xAlice": "1000000" }
+    },
+    "input": {
+      "from": "0xAlice",
+      "amount": "400000",
+      "operationId": "0x0002"
+    },
+    "expected": {
+      "output": { "success": true },
+      "stateChanges": {
+        "totalSupply": "600000",
+        "balances": { "0xAlice": "600000" }
+      },
+      "events": [
+        { "name": "Burned", "fields": { "from": "0xAlice", "amount": "400000", "operationId": "0x0002" } },
+        { "name": "Transferred", "fields": { "from": "0xAlice", "to": "0x0", "amount": "400000" } }
+      ],
+      "reverts": false
+    }
+  },
+  {
+    "id": "TB-006",
+    "description": "baseType returns the correct classification",
+    "primitive": "ITokenBase",
+    "operation": "baseType",
+    "setup": {
+      "configuredBaseType": "Fungible"
+    },
+    "input": {},
+    "expected": {
+      "output": { "baseType": "Fungible" },
+      "stateChanges": {},
+      "events": [],
+      "reverts": false
+    }
+  }
+]
