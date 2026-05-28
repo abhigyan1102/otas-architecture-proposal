@@ -39,4 +39,4 @@ Token Metadata:
 
 ## Implementation Status
 
-Reference implementation pending — will follow the same pattern as `SovereignBond.sol` with `IHoldable` removed.
+Reference implementation will follow after the whitepaper and specification phases are complete (see [ROADMAP.md](../../ROADMAP.md) — Phase 4). The design above documents the intended primitive composition to guide specification work.
