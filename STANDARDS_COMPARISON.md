@@ -22,21 +22,23 @@ Each standard is evaluated across 10 dimensions relevant to the OTAS Lab's scope
 
 ## Matrix
 
-| Standard | Base Type | Compliance | Identity | Transfer Restriction | Hold | DvP | Metadata | Events | Platform | ISO |
-|----------|-----------|------------|----------|---------------------|------|-----|----------|--------|----------|-----|
-| **ERC-20** | Fungible | None | Address | None | None | None | None | Minimal (Transfer, Approval) | EVM | None |
-| **ERC-721** | NonFungible | None | Address | None | None | None | URI-only (tokenURI) | Minimal | EVM | None |
-| **ERC-1155** | Fungible+NFT | None | Address | None | None | None | URI-only | Minimal | EVM | None |
-| **ERC-1400** | Partitioned | Hybrid | Off-chain keys | Pre-hook (`canTransfer`) | None | None | Document mgmt | Partitioned Transfer events | EVM | None |
-| **ERC-3643 (T-REX)** | Fungible | On-chain | ONCHAINID Claims | Modular (`ModularCompliance`) | None | None | None | Rich (compliance events) | EVM | None |
-| **ERC-1404** | Fungible | Hook-based | Address | Pre-hook (`detectTransferRestriction`) | None | None | None | Minimal + reason codes | EVM | None |
-| **CMTAT v3.2** | Fungible | Role-based | AccessControl roles | Modular (pause, snapshot, enforce) | None | None | Snapshot | Module-level events | EVM+Tezos | Partial (Swiss law) |
-| **ERC-4626** | Fungible (vault) | None | Address | None | Async (ERC-7540) | None | None | Deposit/Withdraw events | EVM | None |
+> **Reading guide**: This matrix evaluates each standard across 10 dimensions to identify what OTAS can *learn from* and what *gaps remain*. Empty cells (—) indicate the standard does not address that dimension.
+
+| Standard | Base Type | Compliance Model | Identity Binding | Transfer Restriction | Hold/Escrow | DvP Settlement | Metadata Model | Lifecycle Events | Platform | Cross-chain Portability |
+|----------|-----------|-----------------|-----------------|---------------------|-------------|---------------|---------------|-----------------|----------|------------------------|
+| **ERC-20** | Fungible | None | Address only | None | None | None | None | Transfer, Approval only | EVM | None — EVM only |
+| **ERC-721** | NonFungible | None | Address only | None | None | None | URI-only (tokenURI) | Transfer only | EVM | None — EVM only |
+| **ERC-1155** | Fungible + NFT | None | Address only | None | None | None | URI-only | Batch transfer | EVM | None — EVM only |
+| **ERC-1400** | Partitioned | Hybrid (off-chain + hooks) | Off-chain keys | Pre-hook (`canTransfer`) | None | None | Document management | Partitioned transfers, document events | EVM | None — complex off-chain deps |
+| **ERC-3643 (T-REX)** | Fungible | On-chain modular | ONCHAINID Claims | Modular (`ModularCompliance`) | None | None | None | Rich compliance events | EVM | None — coupled to ONCHAINID |
+| **ERC-1404** | Fungible | Hook-based | Address only | Pre-hook + reason codes | None | None | None | Minimal + restriction codes | EVM | None — EVM only |
+| **CMTAT v3.2** | Fungible | Role-based modular | AccessControl roles | Pause, snapshot, enforce | None | None | Snapshot state | Module-level events | EVM + Tezos | Partial — 2 platforms |
+| **ERC-4626** | Fungible (vault) | None | Address only | None | Async via ERC-7540 | None | None | Deposit/Withdraw | EVM | None — DeFi-specific |
 | **ERC-7943** | Fungible | Hook-based | — | — | — | — | — | — | EVM | — |
-| **Fabric Token SDK** | Fungible+NFT | App-level | Wallet ID | PDC-based | None | App-level | None | Chaincode events | Fabric | None |
-| **SUI Closed-Loop** | Fungible | Policy-based | Address | `DenyList` + TransferPolicy | None | None | Object metadata | SUI events | SUI | None |
-| **SATP (IETF)** | Transport-level | None | Gateway ID | None | Gateway escrow | 2-phase commit | Asset identifier only | Protocol messages | Multi | None |
-| **Chainlink DTA** | N/A (standard) | Oracle-based | — | — | — | — | — | — | Multi | Partial |
+| **Fabric Token SDK** | Fungible + NFT | Application-level | Wallet ID | PDC-based | None | Application-level | None | Chaincode events | Fabric | None — Fabric only |
+| **SUI Closed-Loop** | Fungible | Policy-based | Address only | DenyList + TransferPolicy | None | None | Object metadata | SUI events | SUI | None — SUI only |
+| **SATP (IETF)** | Transport-level | None | Gateway ID | None | Gateway escrow | 2-phase commit | Asset identifier only | Protocol messages | Multi | **Yes** — designed for it |
+| **Chainlink DTA** | N/A (data standard) | Oracle-based | — | — | — | — | — | — | Multi | Partial — oracle-dependent |
 
 ## Key Gaps Identified
 
